@@ -11,8 +11,18 @@ namespace SEOAnalyzer.Models
             initStopWords();
             stopFilterRes = new Hashtable();
             wordCountRes = new Hashtable();
+            metaCountRes = new Hashtable();
+            URLList = new ArrayList();
         }
         public string SEOStr { get; set; }
+        public int URLCount { get; set; }
+        public ArrayList URLList { get; set; }
+
+        public string SEOType { get; set; }
+
+        public Hashtable metaCountRes { get; set; }
+
+        public String metaCountTable { get; set; }
 
         public Hashtable stopFilterRes { get; set; }
 
@@ -68,6 +78,41 @@ namespace SEOAnalyzer.Models
                 wordCountTable = strTable;
             }
         }
+
+        private void fnSetMetaCountTable()
+        {
+            Hashtable table = metaCountRes;
+            string strTable = "";
+            if (table.Count > 0)
+            {
+                int no = 1;
+                strTable = "<table id=\"meta-counter\" class=\"table table-striped table-bordered table-sm\" cellspacing=\"0\" width=\"100 % \">";
+                strTable += "<thead>";
+                strTable += "<tr>";
+                strTable += "<th>No.</th>";
+                strTable += "<th>Word</th>";
+                strTable += "<th>Count</th>";
+                strTable += "</tr>";
+                strTable += "</thead>";
+                strTable += "<tbody>";
+                foreach (Object key in table.Keys)
+                {
+                    strTable += "<tr>";
+                    strTable += "<td>" + no + "</td>";
+                    strTable += "<td>" + key + "</td>";
+                    strTable += "<td>" + table[key] + "</td>";
+                    strTable += "</tr>";
+                    no++;
+                }
+                strTable += "</tbody>";
+                strTable += "</table>";
+            }
+
+            if (!string.IsNullOrEmpty(strTable))
+            {
+                metaCountTable = strTable;
+            }
+        }
         private void fnSetFilterTable()
         {
             Hashtable table = stopFilterRes;
@@ -107,7 +152,7 @@ namespace SEOAnalyzer.Models
         {
             if(fnType.Equals("stop-word"))
             {
-                string[] arrTxt = SEOStr.Split(" ");
+                string[] arrTxt = SEOStr.Replace("\r\n", " ").Split(" ");
                 string extracted = "";
                 Boolean isStop;
                 int count;
@@ -125,7 +170,6 @@ namespace SEOAnalyzer.Models
                             }
                             else
                             {
-                                Console.WriteLine(stopFilterRes[check]);
                                 count = ((int) stopFilterRes[check]) + 1;
                                 stopFilterRes[check] = count;
                             }
@@ -153,23 +197,165 @@ namespace SEOAnalyzer.Models
         //Task 2
         public void fnWordCount()
         {
-            string[] arrTxt = SEOStr.Split(" ");
+            string[] arrTxt = SEOStr.Replace(".", "").Replace(",", "").Replace("\r\n", " ").Split(" ");
             int count;
+            bool isTag = false;
+            string strWrd = "";
             foreach (string word in arrTxt)
             {
-                if (!wordCountRes.ContainsKey(word))
-                {
-                    wordCountRes.Add(word, 1);
+                if(SEOType.Equals("URL")) {
+
+                    if (!word.Contains("http:") && !word.Contains("https:"))
+                    {
+                        if (word.StartsWith("<p>"))
+                        {
+                            isTag = true;
+                        }
+                        else if (word.EndsWith("</p>"))
+                        {
+                            isTag = false;
+                        }
+
+                        if (isTag)
+                        {
+                            strWrd = word.Replace("<p>", "");
+                            strWrd = strWrd.Replace("</p>", "");
+                            if (!wordCountRes.ContainsKey(strWrd))
+                            {
+                                wordCountRes.Add(strWrd, 1);
+                            }
+                            else
+                            {
+                                count = ((int)wordCountRes[strWrd]) + 1;
+                                wordCountRes[strWrd] = count;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    Console.WriteLine(wordCountRes[word]);
-                    count = ((int) wordCountRes[word]) + 1;
-                    wordCountRes[word] = count;
+                    if (!word.Contains("http:") && !word.Contains("https:"))
+                    {
+                        if (!wordCountRes.ContainsKey(word))
+                        {
+                            wordCountRes.Add(word, 1);
+                        }
+                        else
+                        {
+                            count = ((int)wordCountRes[word]) + 1;
+                            wordCountRes[word] = count;
+                        }
+                    }
                 }
             }
             fnSetWordCountTable();
         }
 
+        //Task 4
+        public void fnUrlCount()
+        {
+            string[] arrTxt = SEOStr.Replace(",", "").Replace("\r\n", " ").Split(" ");
+            int count = 0;
+            foreach (string word in arrTxt)
+            {
+                if (word.Contains("http:") || word.Contains("https:"))
+                {
+                    count++;
+                    URLList.Add(word.Substring(word.IndexOf("http")));
+                }
+            }
+            URLCount = count;
+        }
+
+        //Task 3
+        public void fnMetaKeywordCount()
+        {
+            string[] arrTxt = SEOStr.Replace(",", "").Replace("\r\n", " ").Split(" ");
+            int count = 0;
+            bool isMeta = false;
+            bool isMetaKey = false;
+            string innerWord;
+            string[] innerArr;
+            bool isTag = false;
+            string strWrd = "";
+            foreach (string word in arrTxt)
+            {
+                innerWord = "";
+                if(word.StartsWith("<meta"))
+                {
+                    isMeta = true;
+                    continue;
+                }
+
+                if(isMeta)
+                {
+                    if (word.Equals("name=\"keywords\""))
+                    {
+                        isMetaKey = true;
+                    }
+                    isMeta = false;
+                    continue;
+                }
+
+                if(isMetaKey)
+                {
+                    if (word.StartsWith("content=\""))
+                    {
+                        innerWord = word.Replace("content=\"", "");
+                    }
+
+                    if (innerWord.Contains(","))
+                    {
+                        innerArr = innerWord.Split(",");
+                        foreach (string inner in innerArr)
+                        {
+                            if (!metaCountRes.ContainsKey(inner))
+                            {
+                                metaCountRes.Add(inner, 0);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!metaCountRes.ContainsKey(innerWord))
+                        {
+                            metaCountRes.Add(innerWord, 0);
+                        }
+                    }
+
+                    if(word.EndsWith("\"")) {
+                        isMetaKey = true;
+                    }
+                    continue;
+                }
+
+                if(!isMetaKey && metaCountRes.Count > 0)
+                {
+                    if (!word.Contains("http:") && !word.Contains("https:"))
+                    {
+                        if (word.StartsWith("<p>"))
+                        {
+                            isTag = true;
+                        }
+                        else if (word.EndsWith("</p>"))
+                        {
+                            isTag = false;
+                        }
+
+                        if (isTag)
+                        {
+                            strWrd = word.Replace("<p>", "");
+                            strWrd = strWrd.Replace("</p>", "");
+                            if(metaCountRes.ContainsKey(strWrd))
+                            {
+                                count = ((int)metaCountRes[strWrd]) + 1;
+                                metaCountRes[strWrd] = count;
+                            }
+                        }
+                    }
+                }
+            }
+            fnSetMetaCountTable();
+        }
     }
 }
