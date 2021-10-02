@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "SEO Analyzer";
+}
+
+<style>
+    .bigger-lbl {
+        font-size: 20px;
+    }
+
+    .bigger-chkbox {
+        height: 22px;
+        width: 22px;
+    }
+</style>
+
+<script>
+    function validateData() {
+
+        if (document.SEO_input.userLink.value == "" && document.SEO_input.userText.value == "") {
+            alert("Please enter URL or text");
+            return false;
+        } else {
+            var filter = document.SEO_input.filter.checked;
+            var occur = document.SEO_input.occur.checked;
+            var meta = document.SEO_input.meta.checked;
+            var ex_url = document.SEO_input.ex_url.checked;
+            if (!filter && !occur && !meta && !ex_url) {
+                alert("Please choose at least 1 function");
+                return false;
+            } else {
+                return true;
+            }
+        }
+        
+    }
+</script>
+
+<div class="text-center mt-5">
+    <h1 class="display-4">@ViewData["Title"]</h1>
+</div>
+
+<div class="row">
+    <form name="SEO_input" method="post" action="/Home/SEO_analyze" onsubmit="return validateData();">
+        <div class="col-md-8 col-md-offset-2">
+            <h2>Enter your URL here</h2>
+            <input name="userLink" class="form-control" type="text" width="500" maxlength="200" />
+            <h2>Enter your text here</h2>
+            <textarea name="userText" class="form-control" rows="5" cols="500" maxlength="2000"></textarea>
+            <hr />
+            <h2>SEO Functionalities (choose at least 1):</h2>
+            <div class="col-md-10 col-md-offset-2 mt-2">
+                <input name="filter" id="checkbox_filter" class="bigger-chkbox form-check-input pr-3 mr-3" type="checkbox" /><label for="checkbox_filter" class="ml-2 bigger-lbl form-check-label">Filters out stop-words (e.g.: ‘or’, ‘and’, ‘a’, ‘the’ etc.)</label>
+            </div>
+            <div class="col-md-10 col-md-offset-2 mt-2">
+                <input name="occur" id="checkbox_occur" class="bigger-chkbox form-check-input pr-3 mr-3" type="checkbox" /><label for="checkbox_occur" class="ml-2 bigger-lbl form-check-label">Calculate number of occurance of words</label>
+            </div>
+            <div class="col-md-10 col-md-offset-2 mt-2">
+                <input name="meta" id="checkbox_meta" class="bigger-chkbox form-check-input pr-3 mr-3" type="checkbox" /><label for="checkbox_meta" class="ml-2 bigger-lbl form-check-label">Calculate number of occurance of words listed in meta</label>
+            </div>
+            <div class="col-md-10 col-md-offset-2 mt-2">
+                <input name="ex_url" id="checkbox_ex_url" class="bigger-chkbox form-check-input pr-3 mr-3" type="checkbox" /><label for="checkbox_ex_url" class="ml-2 bigger-lbl form-check-label">Calculate number of external link</label>
+            </div>
+            <br />
+            <button class="btn btn-success" type="submit">Scan my text/URL</button>
+        </div>
+    </form>
+</div>

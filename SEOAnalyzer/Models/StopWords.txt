@@ -1,0 +1,6 @@
+﻿txt = today is a good day and is not bad
+
+if(txt.contains("is"))
+{
+	txt  = txt.replace
+}

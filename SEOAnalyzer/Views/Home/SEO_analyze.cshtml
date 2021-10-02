@@ -1,0 +1,31 @@
+﻿@using System.Collections;
+
+<style>
+    table.table-bordered {
+        border: 1px solid blue;
+        margin-top: 20px;
+    }
+
+        table.table-bordered > thead > tr > th {
+            border: 1px solid blue;
+        }
+
+        table.table-bordered > tbody > tr > td {
+            border: 1px solid blue;
+        }
+</style>
+
+<div class="text-center mt-5">
+    <h1 class="display-4">Your data here</h1>
+    @*<p>@ViewData["Greeting"]<br />This is your @ViewData["numTimes"]</p>*@
+</div>
+
+<div class="row">
+    <div class="col-md-10 col-md-offset-2">
+        <h2>User URL: @ViewData["userLink"]</h2>
+        <h2>User Text: @ViewData["userText"]</h2>
+        <h4>User Function:</h4>
+        @Html.Raw(ViewData["userFunction"])
+        <a href="/Home/SEO_main" class="btn btn-success">Return to input page</a>
+    </div>
+</div>
