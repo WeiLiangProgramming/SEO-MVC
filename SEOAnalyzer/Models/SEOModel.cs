@@ -62,6 +62,10 @@ namespace SEOAnalyzer.Models
                 strTable += "<tbody>";
                 foreach (Object key in table.Keys)
                 {
+                    if (no > 20)
+                    {
+                        break;
+                    }
                     strTable += "<tr>";
                     strTable += "<td>" + no + "</td>";
                     strTable += "<td>" + key + "</td>";
@@ -97,6 +101,10 @@ namespace SEOAnalyzer.Models
                 strTable += "<tbody>";
                 foreach (Object key in table.Keys)
                 {
+                    if(no > 20)
+                    {
+                        break;
+                    }
                     strTable += "<tr>";
                     strTable += "<td>" + no + "</td>";
                     strTable += "<td>" + key + "</td>";
@@ -131,6 +139,10 @@ namespace SEOAnalyzer.Models
                 strTable += "<tbody>";
                 foreach (Object key in table.Keys)
                 {
+                    if(no > 20)
+                    {
+                        break;
+                    }
                     strTable += "<tr>";
                     strTable += "<td>" + no + "</td>";
                     strTable += "<td>" + key + "</td>";
@@ -197,38 +209,43 @@ namespace SEOAnalyzer.Models
         //Task 2
         public void fnWordCount()
         {
-            string[] arrTxt = SEOStr.Replace(".", "").Replace(",", "").Replace("\r\n", " ").Split(" ");
+            string[] arrTxt = SEOStr.Replace(".", " ").Replace(",", " ").Replace("\r\n", " ").Replace("  ", " ").Split(" ");
             int count;
             bool isTag = false;
             string strWrd = "";
+            int tagCount = 0;
             foreach (string word in arrTxt)
             {
                 if(SEOType.Equals("URL")) {
 
                     if (!word.Contains("http:") && !word.Contains("https:"))
                     {
-                        if (word.StartsWith("<p>"))
+                        if (word.StartsWith("<"))
                         {
-                            isTag = true;
-                        }
-                        else if (word.EndsWith("</p>"))
-                        {
-                            isTag = false;
+                            tagCount++;
                         }
 
-                        if (isTag)
+                        if (tagCount == 0)
                         {
-                            strWrd = word.Replace("<p>", "");
-                            strWrd = strWrd.Replace("</p>", "");
-                            if (!wordCountRes.ContainsKey(strWrd))
+                            if(String.IsNullOrEmpty(word.Trim()))
                             {
-                                wordCountRes.Add(strWrd, 1);
+                                continue;
+                            }
+
+                            if (!wordCountRes.ContainsKey(word.Trim()))
+                            {
+                                wordCountRes.Add(word.Trim(), 1);
                             }
                             else
                             {
-                                count = ((int)wordCountRes[strWrd]) + 1;
-                                wordCountRes[strWrd] = count;
+                                count = ((int)wordCountRes[word.Trim()]) + 1;
+                                wordCountRes[word.Trim()] = count;
                             }
+                        }
+
+                        if (word.EndsWith(">"))
+                        {
+                            tagCount--;
                         }
                     }
                 }
@@ -256,12 +273,19 @@ namespace SEOAnalyzer.Models
         {
             string[] arrTxt = SEOStr.Replace(",", "").Replace("\r\n", " ").Split(" ");
             int count = 0;
+            string url = "";
             foreach (string word in arrTxt)
             {
+                url = "";
                 if (word.Contains("http:") || word.Contains("https:"))
                 {
                     count++;
-                    URLList.Add(word.Substring(word.IndexOf("http")));
+                    url = word.Substring(word.IndexOf("http"));
+                    if(url.Contains("\""))
+                    {
+                        url = url.Substring(0, url.IndexOf("\""));
+                    }
+                    URLList.Add(url);
                 }
             }
             URLCount = count;
@@ -270,7 +294,7 @@ namespace SEOAnalyzer.Models
         //Task 3
         public void fnMetaKeywordCount()
         {
-            string[] arrTxt = SEOStr.Replace(",", "").Replace("\r\n", " ").Split(" ");
+            string[] arrTxt = SEOStr.Replace("\r\n", " ").Split(" ");
             int count = 0;
             bool isMeta = false;
             bool isMetaKey = false;
@@ -303,13 +327,22 @@ namespace SEOAnalyzer.Models
                     {
                         innerWord = word.Replace("content=\"", "");
                     }
+                    else if (word.EndsWith("\"") || word.EndsWith("\">"))
+                    {
+                        isMetaKey = false;
+                        innerWord = word.Substring(0, word.IndexOf("\""));
+                    }
+                    else
+                    {
+                        innerWord = word;
+                    }
 
                     if (innerWord.Contains(","))
                     {
                         innerArr = innerWord.Split(",");
                         foreach (string inner in innerArr)
                         {
-                            if (!metaCountRes.ContainsKey(inner))
+                            if (!(String.IsNullOrEmpty(inner.Trim())) && !metaCountRes.ContainsKey(inner))
                             {
                                 metaCountRes.Add(inner, 0);
                             }
@@ -317,14 +350,10 @@ namespace SEOAnalyzer.Models
                     }
                     else
                     {
-                        if (!metaCountRes.ContainsKey(innerWord))
+                        if (!metaCountRes.ContainsKey(innerWord.Replace(",", "")))
                         {
-                            metaCountRes.Add(innerWord, 0);
+                            metaCountRes.Add(innerWord.Replace(",", ""), 0);
                         }
-                    }
-
-                    if(word.EndsWith("\"")) {
-                        isMetaKey = true;
                     }
                     continue;
                 }

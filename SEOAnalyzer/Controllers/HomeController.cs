@@ -70,20 +70,19 @@ namespace SEOAnalyzer.Controllers
             }
             else
             {
-                //Do filter stop-word
                 if (filter.Equals("on"))
                 {
                     model.fnExtract("stop-word");
                     if (model.SEOType.Equals("Text")) {
                         functions = "<hr><h4>Processed String:</h4><p>" + model.SEOStr + "</p>";
                     }
-                    functions += "<h4>Stop-Word Count Result:</h4>" + model.stopFilterTable;
+                    functions += "<h4>Stop-Word Count Result (First 20):</h4>" + model.stopFilterTable;
                 }
 
                 if (occur.Equals("on"))
                 {
                     model.fnWordCount();
-                    functions += "<hr><h4>Word Count Result:</h4>" + model.wordCountTable;
+                    functions += "<hr><h4>Word Count Result (First 20):</h4>" + model.wordCountTable;
                 }
 
                 if (meta.Equals("on"))
@@ -91,7 +90,7 @@ namespace SEOAnalyzer.Controllers
                     model.fnMetaKeywordCount();
                     if (model.metaCountRes.Count > 0)
                     {
-                        functions += "<hr><h4>Meta Count Result:</h4>" + model.metaCountTable;
+                        functions += "<hr><h4>Meta Count Result (First 20):</h4>" + model.metaCountTable;
                     }
                     else
                     {
@@ -104,12 +103,17 @@ namespace SEOAnalyzer.Controllers
                     model.fnUrlCount();
                     functions += "<hr><h4>External URL Count Result:</h4>" +
                                     "<h4>URL Count = " + model.URLCount + "</h4>" +
-                                    "<h4>URL Listing:</h4>";
+                                    "<h4>URL Listing (First 10):</h4>";
                     if (model.URLList.Count > 0)
                     {
                         functions += "<ul>";
-                        foreach (string url in model.URLList)
+                        for(int i = 0; i < model.URLList.Count && i < 20; i++)
                         {
+                            String url = model.URLList[i] as string;
+                            if(url.Length > 200)
+                            {
+                                url = url.Substring(0, 200) + "...";
+                            }
                             functions += "<li>" + url + "</li>";
                         }
                         functions += "</ul>";
