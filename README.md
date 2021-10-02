@@ -6,7 +6,8 @@ Readme
 - create the list of stop-words for the filter
 - detecting the external URL
 - extracting words from an URL
-- the meta tag function is slightly bugged
+- the meta tag function might be slightly bugged
+- URL too long unable to fully display
 
 #Decisions
 - to use either text file to store or just put the stop-words in an array
@@ -20,6 +21,8 @@ Readme
 
 #Testing
 - 5 long text and 5 URL for testing
+- https://github.com/WeiLiangProgramming/SEO-MVC/blob/master/testing-details
 
 #Struggles
-- unable to debug the meta tag function
+- meta tag function unsure whether functionable
+- reduced display results as full result display seems to lead to page unable to load
